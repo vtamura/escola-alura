@@ -39,13 +39,18 @@ class PessoaController {
         const { id } = req.params
         const pessoaAtualizada = req.body
         try {
-            const response = await database.Pessoas.update(pessoaAtualizada,
+            await database.Pessoas.update(pessoaAtualizada,
                 {
                     where: {
                         id: Number(id)
                     }
                 })
-            return res.status(200).send('Pessoa atualizada com sucesso.')
+            const resPessoaAtualizada = await database.Pessoas.findOne({
+                where: {
+                    id: id
+                }
+            })
+            return res.status(200).json(resPessoaAtualizada)
         } catch(error) {
             return res.status(500).json(error.message)
         }
@@ -54,7 +59,7 @@ class PessoaController {
     static async deletaPessoa(req, res) {
         const { id } = req.params
         try {
-            const response = await database.Pessoas.delete(
+            await database.Pessoas.destroy(
                 {
                     where: {
                         id: Number(id)
