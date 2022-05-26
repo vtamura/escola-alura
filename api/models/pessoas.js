@@ -15,17 +15,42 @@ module.exports = (sequelize, DataTypes) => {
       })
       
       Pessoas.hasMany(models.Matriculas, {
-        foreignKey: 'estudante_id'
+        foreignKey: 'estudante_id',
+        scope: {
+           status: 'confirmado'
+        },
+        as: 'aulasMatriculadas'
       })
     }
   }
   Pessoas.init({
-    nome: DataTypes.STRING,
+    nome: {
+      type: DataTypes.STRING,
+      validate: {
+        function(dado) {
+          if(dado.length < 3) throw new Error('Nome de usuário inválido.')
+        }
+      }
+    },
     ativo: DataTypes.BOOLEAN,
-    email: DataTypes.STRING,
+    email: {
+      type: DataTypes.STRING,
+      validate: {
+        isEmail: {
+          args: true,
+          msg: 'Email inválido.'
+        }
+      }
+    },
     role: DataTypes.STRING
   }, {
     sequelize,
+    paranoid: true,
+    defaultScope: {
+      where: {
+        ativo: true
+      }
+    },
     modelName: 'Pessoas',
   });
   return Pessoas;
