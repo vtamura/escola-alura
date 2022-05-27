@@ -1,11 +1,13 @@
 const database = require('../models') // require busca o index por padrão
+const Services = require('../services/Services')
+const pessoasServices = new Services('Pessoas')
 
 class PessoaController {
     static async inserePessoa(req, res) {
         const novaPessoa = req.body
         try {
-            const response = await database.Pessoas.create(novaPessoa)
-            return res.status(200).json(response)
+            const response = await pessoasServices.insereRegistro(novaPessoa)
+            return res.status(200).json({ message: 'Usuário criado', usuario: response })
         } catch(error) {
             return res.status(500).json(error.message)
         }
@@ -13,7 +15,7 @@ class PessoaController {
 
     static async listaPessoas(req, res) {
         try {
-            const response = await database.Pessoas.findAll()
+            const response = await pessoasServices.listaRegistros()
             return res.status(200).json(response)
         } catch(error) {
             return res.status(500).json(error.message)
@@ -23,12 +25,7 @@ class PessoaController {
     static async listaPessoa(req, res) {
         const { id } = req.params
         try {
-            const response = await database.Pessoas.findOne(
-                {
-                    where: {
-                        id: Number(id)
-                    }
-                })
+            const response = await pessoasServices.listaRegistro({id})
             return res.status(200).json(response)
         } catch(error) {
             return res.status(500).json(error.message)
@@ -39,18 +36,9 @@ class PessoaController {
         const { id } = req.params
         const pessoaAtualizada = req.body
         try {
-            await database.Pessoas.update(pessoaAtualizada,
-                {
-                    where: {
-                        id: Number(id)
-                    }
-                })
-            const resPessoaAtualizada = await database.Pessoas.findOne({
-                where: {
-                    id: id
-                }
-            })
-            return res.status(200).json(resPessoaAtualizada)
+            await pessoasServices.atualizaRegistro(pessoaAtualizada, id)
+            const resPessoaAtualizada = await pessoasServices.listaRegistro(id)
+            return res.status(200).json({ message: 'Pessoa atualizada', dados_atualizados: resPessoaAtualizada })
         } catch(error) {
             return res.status(500).json(error.message)
         }
@@ -59,13 +47,8 @@ class PessoaController {
     static async deletaPessoa(req, res) {
         const { id } = req.params
         try {
-            await database.Pessoas.destroy(
-                {
-                    where: {
-                        id: Number(id)
-                    }
-                })
-            return res.status(200).json(`Id ${id} deletado com sucesso.`)
+            await pessoasServices.deletaRegistro(id)
+            return res.status(200).json({ message: `Id ${id} deletado com sucesso.` })
         } catch(error) {
             return res.status(500).json(error.message)
         }
@@ -75,12 +58,7 @@ class PessoaController {
         const { id } = req.params
         
         try {
-            await database.Pessoas.restore({
-                where: {
-                    id: Number(id)
-                }
-            })
-
+            await pessoasServices.restauraRegistro(id)
             return res.status(200).json(`Id ${id} restaurado.`)
         } catch(error) {
             return res.status(500).json(error.message)

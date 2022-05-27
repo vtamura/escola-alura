@@ -1,10 +1,12 @@
 const database = require('../models') // require busca o index por padrão
+const Services = require('../services/Services')
+const NiveisServices = new Services('Niveis')
 
 class NiveisController {
     static async insereNivel(req, res) {
-        const novaNivel = req.body
+        const novoNivel = req.body
         try {
-            const response = await database.Niveis.create(novaNivel)
+            const response = await NiveisServices.insereRegistro(novoNivel)
             return res.status(200).json(response)
         } catch(error) {
             return res.status(500).json(error.message)
@@ -13,7 +15,7 @@ class NiveisController {
 
     static async listaNiveis(req, res) {
         try {
-            const response = await database.Niveis.findAll()
+            const response = await NiveisServices.listaRegistros()
             return res.status(200).json(response)
         } catch(error) {
             return res.status(500).json(error.message)
@@ -23,12 +25,7 @@ class NiveisController {
     static async listaNivel(req, res) {
         const { id } = req.params
         try {
-            const response = await database.Niveis.findOne(
-                {
-                    where: {
-                        id: Number(id)
-                    }
-                })
+            const response = await NiveisServices.listaRegistro({id})
             return res.status(200).json(response)
         } catch(error) {
             return res.status(500).json(error.message)
@@ -37,20 +34,11 @@ class NiveisController {
 
     static async atualizaNivel(req, res) {
         const { id } = req.params
-        const NivelAtualizada = req.body
+        const NivelAtualizado = req.body
         try {
-            await database.Niveis.update(NivelAtualizada,
-                {
-                    where: {
-                        id: Number(id)
-                    }
-                })
-            const resNivelAtualizada = await database.Niveis.findOne({
-                where: {
-                    id: id
-                }
-            })
-            return res.status(200).json(resNivelAtualizada)
+            await NiveisServices.atualizaRegistro(NivelAtualizado, id)
+            const resNivelAtualizado = await NiveisServices.findOne(id)
+            return res.status(200).json(resNivelAtualizado)
         } catch(error) {
             return res.status(500).json(error.message)
         }
@@ -59,12 +47,7 @@ class NiveisController {
     static async deletaNivel(req, res) {
         const { id } = req.params
         try {
-            await database.Niveis.destroy(
-                {
-                    where: {
-                        id: Number(id)
-                    }
-                })
+            await NiveisServices.deletaRegistro(id)
             return res.status(200).json('Nivel deletada com sucesso.')
         } catch(error) {
             return res.status(500).json(error.message)
@@ -75,11 +58,7 @@ class NiveisController {
         const { id } = req.params
         
         try {
-            await database.Niveis.restore({
-                where: {
-                    id: Number(id)
-                }
-            })
+            await NiveisServices.restauraRegistro(id)
 
             return res.status(200).json(`Id ${id} restaurado.`)
         } catch(error) {
